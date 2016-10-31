@@ -107,6 +107,7 @@ class Freezer(object):
             app.config.setdefault('FREEZER_RELATIVE_URLS', False)
             app.config.setdefault('FREEZER_IGNORE_404_NOT_FOUND', False)
             app.config.setdefault('FREEZER_REDIRECT_POLICY', 'follow')
+            app.config.setdefault('FREEZER_ENDPOINT_BLACKLIST', [])
 
     def register_generator(self, function):
         """Register a function as an URL generator.
@@ -229,7 +230,11 @@ class Freezer(object):
                     url = parsed_url.path
                     if not isinstance(url, unicode):
                         url = url.decode(url_encoding)
-                    yield url, endpoint
+                    
+                    blacklist = self.app.config['FREEZER_ENDPOINT_BLACKLIST']
+                    filtered = [b for b in blacklist if b in endpoint]
+                    if filtered.__len__() == 0:
+                        yield url, endpoint
 
     def _check_endpoints(self, seen_endpoints):
         """
